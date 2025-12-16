@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}Вход{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="mb-0">Вход в систему</h2>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    {% if form.errors %}
+                    <div class="alert alert-danger">
+                        Неверное имя пользователя или пароль.
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Имя пользователя</label>
+                        <input type="text" name="username" class="form-control" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Пароль</label>
+                        <input type="password" name="password" class="form-control" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Войти</button>
+                    <a href="{% url 'articles:article_list' %}" class="btn btn-secondary">Отмена</a>
+                </form>
+                
+                <hr class="my-4">
+                
+                <div class="text-center">
+                    <p>Или войдите через админку:</p>
+                    <a href="/admin/login/" class="btn btn-outline-dark">Админка</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
