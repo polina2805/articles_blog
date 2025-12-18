@@ -9,7 +9,6 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -52,13 +51,14 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'blog_service.urls'
 
+import os
 from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR, 'templates'],  # ← важно!
+        'DIRS': [os.path.join(BASE_DIR, 'templates')], 
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -126,6 +126,6 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGIN_URL = '/articles/login/'  # Наша собственная страница входа
-LOGIN_REDIRECT_URL = '/articles/'  # После входа - на список статей
+LOGIN_URL = '/articles/login/'  
+LOGIN_REDIRECT_URL = '/articles/'  
 LOGOUT_REDIRECT_URL = '/articles/'
