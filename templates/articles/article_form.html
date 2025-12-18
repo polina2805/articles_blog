@@ -1,54 +1,81 @@
 {% extends 'base.html' %}
 
 {% block title %}
-    {% if form.instance.pk %}Редактировать статью{% else %}Создать статью{% endif %}
+    {% if article %}Редактировать статью{% else %}Создать статью{% endif %}
 {% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header">
-                <h2 class="mb-0">{% if form.instance.pk %}Редактировать статью{% else %}Создать статью{% endif %}</h2>
-            </div>
-            <div class="card-body">
-                <form method="post">
-                    {% csrf_token %}
-                    
-                    {% if form.non_field_errors %}
-                    <div class="alert alert-danger">
-                        {% for error in form.non_field_errors %}
-                            {{ error }}
-                        {% endfor %}
-                    </div>
-                    {% endif %}
-                    
-                    {% for field in form %}
-                    <div class="mb-3">
-                        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                        {{ field }}
-                        {% if field.errors %}
-                        <div class="text-danger">
-                            {% for error in field.errors %}
-                                {{ error }}
-                            {% endfor %}
-                        </div>
-                        {% endif %}
-                        {% if field.help_text %}
-                        <div class="form-text">{{ field.help_text }}</div>
-                        {% endif %}
-                    </div>
-                    {% endfor %}
-                    
-                    <div class="d-flex justify-content-between">
-                        <button type="submit" class="btn btn-primary">
-                            {% if form.instance.pk %}Сохранить изменения{% else %}Создать статью{% endif %}
-                        </button>
-                        <a href="{% url 'articles:article_list' %}" class="btn btn-secondary">Отмена</a>
-                    </div>
-                </form>
+<div style="max-width: 800px; margin: 0 auto;">
+    <h1 style="margin-bottom: 30px;">
+        {% if article %}
+            ✏️ Редактировать статью
+        {% else %}
+            ✨ Создать новую статью
+        {% endif %}
+    </h1>
+    
+    {% if article %}
+    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+        <small>
+            <strong>ID:</strong> #{{ article.id }} • 
+            <strong>Создана:</strong> {{ article.created_at|date:"d.m.Y H:i" }} • 
+            <strong>Обновлена:</strong> {{ article.updated_at|date:"d.m.Y H:i" }}
+        </small>
+    </div>
+    {% endif %}
+    
+    <form method="post">
+        <div class="form-group">
+            <label>📌 Заголовок</label>
+            <input type="text" name="title" class="form-control" 
+                   value="{{ article.title|default:'' }}"
+                   placeholder="Введите заголовок статьи" required maxlength="200">
+        </div>
+        
+        <div class="form-group">
+            <label>👤 Автор</label>
+            <input type="text" name="author" class="form-control" 
+                   value="{{ article.author|default:'' }}"
+                   placeholder="Введите ваше имя" required maxlength="100">
+        </div>
+        
+        <div class="form-group">
+            <label>📝 Содержание</label>
+            <textarea name="content" class="form-control" 
+                      rows="10" placeholder="Начните писать свою статью..." required>{{ article.content|default:'' }}</textarea>
+            <div style="text-align: right; margin-top: 5px; color: #666; font-size: 14px;">
+                <span id="charCount">{{ article.content|length|default:0 }}</span> символов
             </div>
         </div>
-    </div>
+        
+        <div style="display: flex; gap: 15px; margin-top: 30px;">
+            <a href="{% url 'articles_list' %}" class="btn" style="background: #6c757d;">
+                ↩️ Назад к статьям
+            </a>
+            <button type="submit" class="btn" style="flex-grow: 1;">
+                {% if article %}
+                    💾 Сохранить изменения
+                {% else %}
+                    📤 Опубликовать статью
+                {% endif %}
+            </button>
+        </div>
+    </form>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const contentField = document.querySelector('textarea[name="content"]');
+    const charCount = document.getElementById('charCount');
+    
+    if (contentField && charCount) {
+        function updateCharCount() {
+            charCount.textContent = contentField.value.length;
+        }
+        
+        contentField.addEventListener('input', updateCharCount);
+        updateCharCount(); // Инициализация
+    }
+});
+</script>
 {% endblock %}
