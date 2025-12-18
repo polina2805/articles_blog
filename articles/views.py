@@ -1,44 +1,46 @@
-from django.views.generic import ListView, DetailView, CreateView, UpdateView
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.views import LoginView
-from django.urls import reverse_lazy
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
 from .models import Article
-from .forms import ArticleForm
 
-class ArticleListView(ListView):
-    model = Article
-    template_name = 'articles/article_list.html'
-    context_object_name = 'articles'
-    paginate_by = 10
+def articles_list(request):
+    articles = Article.objects.all().order_by('-created_at')
+    return render(request, 'articles/article_list.html', {'articles': articles})
+
+def create_article(request):
+    if request.method == 'POST':
+        title = request.POST.get('title', '').strip()
+        content = request.POST.get('content', '').strip()
+        author = request.POST.get('author', '').strip()
+        
+        if title and content and author:
+            article = Article.objects.create(
+                title=title,
+                content=content,
+                author=author
+            )
+            messages.success(request, 'Статья успешно создана!')
+            return redirect('articles/articles_list')
+        else:
+            messages.error(request, 'Все поля обязательны для заполнения!')
     
-    def get_queryset(self):
-        return Article.objects.filter(status='published').order_by('-created_at')
+    return render(request, 'articles/article_form.html')
 
-class ArticleDetailView(DetailView):
-    model = Article
-    template_name = 'articles/article_detail.html'
-    context_object_name = 'article'
-
-class ArticleCreateView(LoginRequiredMixin, CreateView):
-    model = Article
-    form_class = ArticleForm
-    template_name = 'articles/article_form.html'
-    success_url = reverse_lazy('articles:article_list')  
+def edit_article(request, id):
+    article = get_object_or_404(Article, id=id)
     
-    def form_valid(self, form):
-        form.instance.author = self.request.user
-        return super().form_valid(form)
-
-class ArticleUpdateView(LoginRequiredMixin, UpdateView):
-    model = Article
-    form_class = ArticleForm
-    template_name = 'articles/article_form.html'
+    if request.method == 'POST':
+        title = request.POST.get('title', '').strip()
+        content = request.POST.get('content', '').strip()
+        author = request.POST.get('author', '').strip()
+        
+        if title and content and author:
+            article.title = title
+            article.content = content
+            article.author = author
+            article.save()
+            messages.success(request, 'Статья успешно обновлена!')
+            return redirect('articles/articles_list')
+        else:
+            messages.error(request, 'Все поля обязательны для заполнения!')
     
-    def get_success_url(self):
-        return reverse_lazy('articles:article_detail', kwargs={'pk': self.object.pk})  
-
-class CustomLoginView(LoginView):
-    template_name = 'articles/login.html'
-    
-    def get_success_url(self):
-        return reverse_lazy('articles:article_list')  
+    return render(request, 'articles/article_form.html', {'article': article})
